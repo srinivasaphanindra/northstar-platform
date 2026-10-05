@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Northstar — Agents as a Service',
+  title: 'Northstar Forge — Agents as a Service',
   description: 'Build AI agent workspaces. Connect social tools. Run Presence, Pipeline, or Agency.',
   applicationName: 'Northstar',
 }

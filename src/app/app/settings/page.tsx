@@ -18,9 +18,9 @@ export default function SettingsPage() {
             <option>America/New_York</option>
           </select>
         </Field>
-        <Field label="SuperGrok confirmed">
+        <Field label="AI capacity ready">
           <label className="flex min-h-11 items-center gap-2 text-sm">
-            <input type="checkbox" className="h-5 w-5" defaultChecked /> Yes — client-paid model
+            <input type="checkbox" className="h-5 w-5" defaultChecked /> Yes — workspace ready to run agents
           </label>
         </Field>
         <button className="btn btn-primary w-full" type="button">

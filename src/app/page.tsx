@@ -25,17 +25,17 @@ export default function MarketingPage() {
       </header>
 
       <section className="mx-auto max-w-5xl px-4 pb-12 pt-10 sm:pt-16">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">Agents as a Service</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">Agents as a Service · Northstar Forge</p>
         <h1 className="font-display mt-3 max-w-2xl text-4xl leading-[1.1] text-white sm:text-6xl">
           A digital workforce for social — built for your phone.
         </h1>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--muted)] sm:text-lg">
-          Create agent workspaces, connect X · Facebook · LinkedIn · Slack, approve drafts, and run Presence, Pipeline, or
-          Agency. Founders and resellers. Mobile-first. Real multi-tenant SaaS.
+          Create agent workspaces, connect X · Facebook · LinkedIn (and more networks over time), approve drafts, and run
+          Presence, Pipeline, or Agency. One human voice across platforms. Founders and resellers. Mobile-first.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link href="/login" className="btn btn-primary w-full sm:w-auto">
-            Open app
+            Open Forge
           </Link>
           <Link href="/pricing" className="btn btn-ghost w-full sm:w-auto">
             See plans
@@ -74,7 +74,7 @@ export default function MarketingPage() {
           {[
             ['Mobile command', 'Bottom tabs, thumb-reach CTAs, full settings on phone.'],
             ['Agents you own', 'Spin writer / social / outreach agents per workspace.'],
-            ['Connect tools', 'Social + Slack — no passwords in the app; OAuth/session later.'],
+            ['Connect tools', 'Social networks you run — no passwords in the app; secure connect later.'],
             ['Reseller ready', 'Sub-accounts, team seats, white-label domain hooks.'],
             ['Pay your way', 'Stripe worldwide · Razorpay India · admin approve without payment.'],
             ['Wire to pods', 'Approved tenants can bridge to Northstar automation runtime.'],
@@ -88,7 +88,7 @@ export default function MarketingPage() {
       </section>
 
       <footer className="border-t border-[var(--border)] px-4 py-8 text-center text-xs text-[var(--muted)]">
-        Northstar Agents · Agents as a Service ·{' '}
+        Northstar Agents · Agents as a Service · Northstar Forge ·{' '}
         <Link href="/login" className="text-white">
           Log in
         </Link>

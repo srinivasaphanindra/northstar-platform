@@ -1,21 +1,21 @@
 import { Badge, Card, PageHeader } from '@/components/ui'
+import { ensureSeed } from '@/lib/session'
+import { prisma } from '@/lib/db'
 
-export default function BusinessesPage() {
+export default async function BusinessesPage() {
+  await ensureSeed()
+  const rows = await prisma.tenant.findMany({ where: { kind: 'BUSINESS' }, orderBy: { createdAt: 'desc' } })
   return (
     <div>
       <PageHeader title="Businesses" />
       <Card className="space-y-3">
-        {[
-          ['Acme Studio', 'PIPELINE', 'ACTIVE'],
-          ['Mike Torres', 'PRESENCE', 'TRIAL'],
-          ['Leaf Studio', 'PRESENCE', 'PENDING_APPROVAL'],
-        ].map(([n, p, s]) => (
-          <div key={n} className="flex items-center justify-between gap-2 border-b border-[var(--border)] pb-3 last:border-0">
+        {rows.map((b) => (
+          <div key={b.id} className="flex items-center justify-between gap-2 border-b border-[var(--border)] pb-3 last:border-0">
             <div>
-              <div className="font-medium text-white">{n}</div>
-              <div className="text-xs text-[var(--muted)]">{p}</div>
+              <div className="font-medium text-white">{b.name}</div>
+              <div className="text-xs text-[var(--muted)]">{b.planId} · {b.slug}</div>
             </div>
-            <Badge tone={s === 'ACTIVE' ? 'ok' : 'warn'}>{s}</Badge>
+            <Badge tone={b.status === 'ACTIVE' ? 'ok' : 'warn'}>{b.status}</Badge>
           </div>
         ))}
       </Card>

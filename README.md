@@ -1,38 +1,23 @@
-# Northstar Platform — Agents as a Service
+# Northstar Forge
 
-Real multi-tenant SaaS control plane for **Northstar Agents**.
+**Agents as a Service** control plane for Northstar.
 
-- **Marketing site** (mobile-first, Claude×Linear language)
-- **App** (platform / reseller / business dashboards)
-- **Backend**: Clerk auth · Postgres (Prisma) · Stripe + Razorpay · admin-comp approvals · white-label domain fields · WireTenant pod bridge hooks
+- Product name: **Northstar Forge** (agency brand remains Northstar Agents)
+- Mobile-first app + marketing site
+- **Local DB works with zero cloud keys** (SQLite file)
+- Stripe + Razorpay ready when you add keys (see `docs/PAYMENTS.md`)
+- Clerk optional later
 
-## Product name
-**Northstar** — Agents as a Service (AaaS)
+## Run (this machine)
 
-## Plans
-| Plan | Who | Price |
-|------|-----|------|
-| Presence | Individual social | $99/mo |
-| Pipeline | Individual + lead gen | $249/mo |
-| Agency | Reseller multi-client | $499/mo |
-| Pilot / Launch | Trial / setup | $99 / $249 |
-
-## Quick start
 ```bash
-cp .env.example .env.local
-# fill Clerk + DATABASE_URL (optional for UI demo mode)
-npm install
-npx prisma generate
-# npx prisma db push   # when Postgres is up
-npm run dev
+cd /home/box/agency/products/northstar-platform
+npm run db:push
+npm run dev -- -p 3020
 ```
 
-Open http://localhost:3000
+Open http://127.0.0.1:3020/login
 
-Without Clerk keys the UI runs in **demo mode** (local mock session).
+## GitHub
 
-## Architecture
-See `docs/ARCHITECTURE.md`.
-
-## Archive
-Previous localStorage shell: https://github.com/srinivasaphanindra/northstar-app-v0
+https://github.com/srinivasaphanindra/northstar-platform

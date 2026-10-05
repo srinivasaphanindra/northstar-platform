@@ -8,7 +8,7 @@ export default function PricingPage() {
         ← Northstar
       </Link>
       <h1 className="font-display mt-4 text-4xl text-white">Pricing</h1>
-      <p className="mt-2 text-[var(--muted)]">You bring SuperGrok / Premium+. We run the agent platform.</p>
+      <p className="mt-2 text-[var(--muted)]">AI agents run your social and lead gen — one human voice across every platform you use.</p>
       <div className="mt-8 space-y-4">
         {PLANS.map((p) => (
           <div key={p.id} className="card p-5">
