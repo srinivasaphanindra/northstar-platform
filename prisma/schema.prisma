@@ -1,0 +1,296 @@
+// Northstar Platform — Agents as a Service
+// Multi-tenant: platform → reseller → business
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TenantKind {
+  PLATFORM
+  RESELLER
+  BUSINESS
+}
+
+enum PlanId {
+  PILOT
+  SETUP
+  PRESENCE
+  PIPELINE
+  AGENCY
+}
+
+enum TenantStatus {
+  PENDING_APPROVAL
+  ONBOARDING
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  PAUSED
+  CANCELLED
+}
+
+enum MembershipRole {
+  PLATFORM_OWNER
+  PLATFORM_OPS
+  RESELLER_OWNER
+  RESELLER_STAFF
+  BUSINESS_OWNER
+  BUSINESS_MEMBER
+}
+
+enum BillingProvider {
+  STRIPE
+  RAZORPAY
+  MANUAL
+  ADMIN_COMP
+}
+
+enum PaymentStatus {
+  REQUIRES_PAYMENT
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  COMPED
+}
+
+enum AgentStatus {
+  DRAFT
+  PROVISIONING
+  LIVE
+  PAUSED
+  ERROR
+}
+
+enum ConnectionProvider {
+  X
+  FACEBOOK
+  LINKEDIN
+  YOUTUBE
+  SLACK
+  GMAIL
+  CUSTOM
+}
+
+enum ConnectionStatus {
+  DISCONNECTED
+  PENDING
+  CONNECTED
+  ERROR
+  REVOKED
+}
+
+enum DraftStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  POSTED
+}
+
+enum LeadStatus {
+  NEW
+  QUALIFIED
+  CONTACTED
+  WON
+  LOST
+}
+
+model User {
+  id            String         @id @default(cuid())
+  clerkId       String         @unique
+  email         String         @unique
+  name          String?
+  imageUrl      String?
+  isPlatformAdmin Boolean      @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  memberships   Membership[]
+  approvals     AdminApproval[] @relation("Approver")
+  requestedApprovals AdminApproval[] @relation("Requester")
+}
+
+model Tenant {
+  id              String        @id @default(cuid())
+  kind            TenantKind
+  name            String
+  slug            String        @unique
+  status          TenantStatus  @default(PENDING_APPROVAL)
+  planId          PlanId        @default(PRESENCE)
+  parentId        String?
+  parent          Tenant?       @relation("TenantTree", fields: [parentId], references: [id])
+  children        Tenant[]      @relation("TenantTree")
+  brandColor      String?
+  logoUrl         String?
+  customDomain    String?       @unique
+  domainVerified  Boolean       @default(false)
+  whiteLabelOn    Boolean       @default(false)
+  superGrokOk     Boolean       @default(false)
+  mrrCents        Int           @default(0)
+  currency        String        @default("USD")
+  billingProvider BillingProvider?
+  stripeCustomerId String?
+  stripeSubId     String?
+  razorpayCustId  String?
+  razorpaySubId   String?
+  podSlug         String?       // maps to agency clients/<slug>
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  memberships     Membership[]
+  agents          Agent[]
+  connections     Connection[]
+  drafts          Draft[]
+  leads           Lead[]
+  activity        ActivityEvent[]
+  invoices        Invoice[]
+  approvals       AdminApproval[]
+  settings        TenantSettings?
+}
+
+model Membership {
+  id        String         @id @default(cuid())
+  userId    String
+  tenantId  String
+  role      MembershipRole
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+
+  @@unique([userId, tenantId])
+  @@index([tenantId])
+}
+
+model TenantSettings {
+  id               String  @id @default(cuid())
+  tenantId         String  @unique
+  tenant           Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  timezone         String  @default("Asia/Kolkata")
+  quietHoursJson   String?
+  voiceNotes       String?
+  notifyEmail      Boolean @default(true)
+  notifySlack      Boolean @default(true)
+  advancedJson     String? // feature flags / advanced settings bag
+}
+
+model Agent {
+  id          String      @id @default(cuid())
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  kind        String      // writer | social | outreach | analyst | custom
+  status      AgentStatus @default(DRAFT)
+  configJson  String?
+  lastRunAt   DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([tenantId])
+}
+
+model Connection {
+  id           String             @id @default(cuid())
+  tenantId     String
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider     ConnectionProvider
+  handle       String?
+  status       ConnectionStatus   @default(DISCONNECTED)
+  livePosting  Boolean            @default(false)
+  metaJson     String?            // non-secret metadata only
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([tenantId])
+}
+
+model Draft {
+  id        String      @id @default(cuid())
+  tenantId  String
+  tenant    Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  platform  String
+  title     String
+  body      String
+  status    DraftStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([tenantId, status])
+}
+
+model Lead {
+  id        String     @id @default(cuid())
+  tenantId  String
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name      String
+  source    String?
+  status    LeadStatus @default(NEW)
+  note      String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([tenantId])
+}
+
+model ActivityEvent {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  kind      String
+  message   String
+  metaJson  String?
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+}
+
+model Invoice {
+  id              String          @id @default(cuid())
+  tenantId        String
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider        BillingProvider
+  externalId      String?
+  amountCents     Int
+  currency        String          @default("USD")
+  status          PaymentStatus   @default(PENDING)
+  createdAt       DateTime        @default(now())
+  paidAt          DateTime?
+
+  @@index([tenantId])
+}
+
+model AdminApproval {
+  id          String   @id @default(cuid())
+  tenantId    String?
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  requesterId String
+  requester   User     @relation("Requester", fields: [requesterId], references: [id])
+  approverId  String?
+  approver    User?    @relation("Approver", fields: [approverId], references: [id])
+  kind        String   // WORKSPACE_CREATE | PLAN_UPGRADE | COMP_ACCESS | DOMAIN
+  status      String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  note        String?
+  createdAt   DateTime @default(now())
+  decidedAt   DateTime?
+
+  @@index([status])
+}
+
+model PlanCatalog {
+  id            String @id // PRESENCE etc
+  name          String
+  tagline       String
+  priceMonthly  Int?
+  priceOneTime  Int?
+  currency      String @default("USD")
+  audience      String
+  featuresJson  String
+  maxClientSeats Int   @default(1)
+  leadGen       Boolean @default(false)
+  multiClient   Boolean @default(false)
+  stripePriceId String?
+  razorpayPlanId String?
+  active        Boolean @default(true)
+}
